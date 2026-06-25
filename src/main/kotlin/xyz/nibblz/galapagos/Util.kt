@@ -1,4 +1,4 @@
-package xyz.nibblz.islandeconomist
+package xyz.nibblz.galapagos
 
 import net.minecraft.client.Minecraft
 import net.minecraft.world.item.Item

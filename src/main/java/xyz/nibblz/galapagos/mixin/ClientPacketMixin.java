@@ -1,4 +1,4 @@
-package xyz.nibblz.islandeconomist.mixin;
+package xyz.nibblz.galapagos.mixin;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import xyz.nibblz.islandeconomist.UtilKt;
-import xyz.nibblz.islandeconomist.features.CoinTracking;
+import xyz.nibblz.galapagos.UtilKt;
+import xyz.nibblz.galapagos.features.CoinTracking;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketMixin {

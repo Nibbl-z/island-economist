@@ -1,4 +1,4 @@
-package xyz.nibblz.islandeconomist.features
+package xyz.nibblz.galapagos.features
 
 interface Feature {
     val id: String

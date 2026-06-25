@@ -1,4 +1,4 @@
-package xyz.nibblz.islandeconomist
+package xyz.nibblz.galapagos
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -18,7 +18,7 @@ data class PlayerSave(
 )
 
 object Save {
-    private val path = FabricLoader.getInstance().configDir.resolve("island-economist").resolve("save.json")
+    private val path = FabricLoader.getInstance().configDir.resolve(Galapagos.MOD_ID).resolve("save.json")
     private val json = Json {
         prettyPrint = true
         encodeDefaults = true
@@ -29,13 +29,13 @@ object Save {
 
         val jsonText = Files.readString(path) ?: return
         val loaded = json.decodeFromString<PlayerSave>(jsonText)
-        IslandEconomist.save = loaded
+        Galapagos.save = loaded
     }
 
     fun save() {
-        val saved = json.encodeToString(IslandEconomist.save)
-        IslandEconomist.logger.info(saved)
-        IslandEconomist.logger.info(path.toString())
+        val saved = json.encodeToString(Galapagos.save)
+        Galapagos.logger.info(saved)
+        Galapagos.logger.info(path.toString())
 
         Files.createDirectories(path.parent)
         Files.writeString(path, saved)

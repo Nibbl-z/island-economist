@@ -1,14 +1,14 @@
-package xyz.nibblz.islandeconomist
+package xyz.nibblz.galapagos
 
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
-import xyz.nibblz.islandeconomist.features.CoinTracking
+import xyz.nibblz.galapagos.features.CoinTracking
 
-object IslandEconomist : ModInitializer {
-	const val MOD_ID: String = "island-economist"
+object Galapagos : ModInitializer {
+	const val MOD_ID: String = "galapagos"
 
 	val logger: Logger = LoggerFactory.getLogger(MOD_ID)
 	var save: PlayerSave = PlayerSave()

@@ -1,4 +1,4 @@
-package xyz.nibblz.islandeconomist.mixin.accessor;
+package xyz.nibblz.galapagos.mixin.accessor;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
@@ -8,5 +8,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractContainerScreen.class)
 public interface HoveredSlotAccessor {
     @Accessor("hoveredSlot")
-    Slot islandeconomist$hoveredSlot();
+    Slot galapagos$hoveredSlot();
 }

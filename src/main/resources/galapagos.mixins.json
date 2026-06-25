@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "xyz.nibblz.islandeconomist.mixin",
+	"package": "xyz.nibblz.galapagos.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"ClientPacketMixin",

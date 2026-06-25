@@ -1,4 +1,4 @@
-# Island Economist
+# Galapagos
 
 ## Setup
 

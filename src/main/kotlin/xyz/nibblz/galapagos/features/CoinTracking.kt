@@ -1,4 +1,4 @@
-package xyz.nibblz.islandeconomist.features
+package xyz.nibblz.galapagos.features
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
@@ -6,10 +6,10 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import xyz.nibblz.islandeconomist.CoinChange
-import xyz.nibblz.islandeconomist.IslandEconomist
-import xyz.nibblz.islandeconomist.findLore
-import xyz.nibblz.islandeconomist.mixin.accessor.HoveredSlotAccessor
+import xyz.nibblz.galapagos.CoinChange
+import xyz.nibblz.galapagos.Galapagos
+import xyz.nibblz.galapagos.findLore
+import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import kotlin.time.Clock
 
 object CoinTracking : Feature {
@@ -46,17 +46,17 @@ object CoinTracking : Feature {
                 if (it.itemName.string == "Purchase Confirmation") Regex("[\\d,]+")
                 else Regex("(?<=/)\\d[\\d,]+")
 
-            IslandEconomist.logger.info("$shiftClickAmount")
+            Galapagos.logger.info("$shiftClickAmount")
 
             val match = it.findLore(regex) ?: continue
             val priceString = match[0] ?: continue
-            IslandEconomist.logger.info(match.toString())
+            Galapagos.logger.info(match.toString())
             val cleanedPriceString = priceString.value.replace(",", "")
             price = cleanedPriceString.toInt()
             break
         }
 
-        IslandEconomist.logger.info("$price, $source")
+        Galapagos.logger.info("$price, $source")
     }
 
     fun handleCoinGain(packet: ClientboundContainerSetContentPacket) {
@@ -70,7 +70,7 @@ object CoinTracking : Feature {
             val cleanedPriceString = priceString.value.replace(",", "")
             val amountGained = cleanedPriceString.toInt()
 
-            IslandEconomist.logger.info("$amountGained")
+            Galapagos.logger.info("$amountGained")
 
             if (shiftClickAmount != 0) {
                 rewardCrate += " x$shiftClickAmount"
@@ -82,7 +82,7 @@ object CoinTracking : Feature {
                 source = rewardCrate ?: "Unknown"
             )
 
-            IslandEconomist.save.coinChanges.add(change)
+            Galapagos.save.coinChanges.add(change)
             rewardCrate = null
             break
         }
@@ -100,7 +100,7 @@ object CoinTracking : Feature {
     }
 
     fun mouseClicked(screen: ContainerScreen, type: ContainerInput) {
-        val item = (screen as HoveredSlotAccessor).`islandeconomist$hoveredSlot`() ?: return
+        val item = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         if (price == 0 && rewardCrate == null) {
             if (item.item.itemName.string.contains("Reward Crate")) {
@@ -113,15 +113,15 @@ object CoinTracking : Feature {
                 shiftClickAmount = 0
             }
 
-            IslandEconomist.logger.info("${item.index}, ${item.item.itemName.string}, $shiftClickAmount")
+            Galapagos.logger.info("${item.index}, ${item.item.itemName.string}, $shiftClickAmount")
 
             return
         } else {
-            IslandEconomist.logger.info("${item.index}, ${item.item.itemName.string}, $shiftClickAmount")
+            Galapagos.logger.info("${item.index}, ${item.item.itemName.string}, $shiftClickAmount")
         }
 
         if (item.index in 46..48) {
-            IslandEconomist.logger.info("this item has apparently been purchased! i've spent $price coins!")
+            Galapagos.logger.info("this item has apparently been purchased! i've spent $price coins!")
 
             if (shiftClickAmount != 0) {
                 price *= shiftClickAmount
@@ -134,7 +134,7 @@ object CoinTracking : Feature {
                 source = source
             )
 
-            IslandEconomist.save.coinChanges.add(change)
+            Galapagos.save.coinChanges.add(change)
 
             price = 0
             source = "Unknown"
@@ -146,6 +146,6 @@ object CoinTracking : Feature {
         price = 0
         rewardCrate = null
         source = "Unknown"
-        IslandEconomist.logger.info("this ui has apparently been closed! (which is probably any ui)")
+        Galapagos.logger.info("this ui has apparently been closed! (which is probably any ui)")
     }
 }
