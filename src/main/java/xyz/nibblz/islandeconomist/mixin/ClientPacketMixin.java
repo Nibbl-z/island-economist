@@ -2,6 +2,7 @@ package xyz.nibblz.islandeconomist.mixin;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,5 +18,13 @@ public class ClientPacketMixin {
         if (!UtilKt.onIsland() || !Minecraft.getInstance().isSameThread()) return;
 
         CoinTracking.INSTANCE.handleContainerContent(packet);
+    }
+
+    @Inject(method = "handleContainerClose", at = @At("TAIL"))
+    private void handleContainerClose(ClientboundContainerClosePacket packet, CallbackInfo ci) {
+        if (!UtilKt.onIsland() || !Minecraft.getInstance().isSameThread()) return;
+
+
+
     }
 }

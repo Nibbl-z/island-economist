@@ -3,7 +3,10 @@
 	"package": "xyz.nibblz.islandeconomist.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-      "ClientPacketMixin"
+		"ClientPacketMixin",
+		"PlayerMixin",
+		"AbstractContainerScreenMixin",
+		"accessor.HoveredSlotAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1
