@@ -40,10 +40,16 @@ object CoinTracking : Feature {
             }
 
             if (!it.`is`(Items.ECHO_SHARD)) continue
-            val regex = Regex("(?<=/)\\d[\\d,]*")
+
+            val regex = if (it.itemName.string == "Purchase Confirmation") {
+                Regex("[\\d,]+")
+            } else {
+                Regex("(?<=/)\\d[\\d,]+")
+            }
+
             val match = it.findLore(regex) ?: continue
             val priceString = match[0] ?: continue
-
+            IslandEconomist.logger.info(match.toString())
             val cleanedPriceString = priceString.value.replace(",", "")
             price = cleanedPriceString.toInt()
             break
@@ -57,7 +63,7 @@ object CoinTracking : Feature {
             if (!it.`is`(Items.ECHO_SHARD)) continue
             if (it.itemName.string != "Coins") continue
 
-            val regex = Regex("(?<=: )\\d[\\d,]*")
+            val regex = Regex("(?<=: )\\d[\\d,]+")
             val match = it.findLore(regex) ?: continue
             val priceString = match[0] ?: continue
             val cleanedPriceString = priceString.value.replace(",", "")
