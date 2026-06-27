@@ -8,6 +8,7 @@ import org.slf4j.Logger
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.CosmeticMachineChances
 import xyz.nibblz.galapagos.features.CrateChances
+import xyz.nibblz.galapagos.features.ExchangeUnitPrice
 import xyz.nibblz.galapagos.features.QuestTracking
 
 object Galapagos : ModInitializer {
@@ -21,6 +22,7 @@ object Galapagos : ModInitializer {
 		QuestTracking.init()
 		CrateChances.init()
 		CosmeticMachineChances.init()
+		ExchangeUnitPrice.init()
 	}
 
 	override fun onInitialize() {
