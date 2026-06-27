@@ -6,6 +6,7 @@ import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
 import xyz.nibblz.galapagos.features.CoinTracking
+import xyz.nibblz.galapagos.features.CrateChances
 import xyz.nibblz.galapagos.features.QuestTracking
 
 object Galapagos : ModInitializer {
@@ -17,6 +18,7 @@ object Galapagos : ModInitializer {
 	fun registerFeatures() {
 		CoinTracking.init()
 		QuestTracking.init()
+		CrateChances.init()
 	}
 
 	override fun onInitialize() {
