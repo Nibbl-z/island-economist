@@ -8,6 +8,24 @@
       "chars": [
         "\uE000"
       ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/style_soul.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/weapon_wisp.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE002"
+      ]
     }
   ]
 }

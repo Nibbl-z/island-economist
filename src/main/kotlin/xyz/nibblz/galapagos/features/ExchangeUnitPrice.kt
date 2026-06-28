@@ -5,16 +5,20 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
+import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
+import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
+import xyz.nibblz.galapagos.features.QuestTracking.getQuestBonus
 import xyz.nibblz.galapagos.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 
@@ -30,6 +34,8 @@ object ExchangeUnitPrice : Feature {
     }
 
     val perUnitPrices: MutableMap<ItemStack, Int> = mutableMapOf()
+    val soulEquivalent: MutableMap<ItemStack, Int> = mutableMapOf()
+    val wispEquivalent: MutableMap<ItemStack, Int> = mutableMapOf()
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
@@ -38,17 +44,65 @@ object ExchangeUnitPrice : Feature {
         perUnitPrices.clear()
 
         packet.items.forEach {
-            getPerUnitPrice(it)
+            //if (it.count == 1) return@forEach
+            getData(it)
         }
     }
 
-    fun getPerUnitPrice(item: ItemStack) {
+    fun getData(item: ItemStack) {
         val regex = Regex("Listed Price: .(?<price>[\\d,]+)")
         val priceString = item.findLore(regex)?.get("price")?.value ?: return
         val cleanedString = priceString.replace(",", "")
         val price = cleanedString.toInt()
 
         perUnitPrices[item] = (price / item.count)
+
+        var rarity: Rarity = Rarity.COMMON
+
+        Rarity.entries.forEach {
+            if (item.findLore(it.tooltipGlyph())) {
+                rarity = it
+            }
+        }
+
+
+
+        if (item.findLore("Chroma Set:")) { // all weapon skins have this lore so its easier to detect that
+            var stars = 0
+            if (item.findLore("Elimination Effect:")) stars = 1
+            if (item.findLore("Eliminations:")) stars = 2
+            if (item.findLore("Weapon Evolution")) stars = 3
+
+            wispEquivalent[item] = when(rarity) {
+                Rarity.RARE -> 1
+                Rarity.EPIC -> when(stars) {
+                    1 -> 3
+                    else -> 2
+                }
+                Rarity.LEGENDARY -> when(stars) {
+                    1 -> 7
+                    2 -> 10
+                    else -> 5
+                }
+                Rarity.MYTHIC -> when(stars) {
+                    1 -> 20
+                    2 -> 30
+                    3 -> 40
+                    else -> 15
+                }
+                else -> 1
+            }
+        } else {
+            if (item.findLore("wardrobe") && !item.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/collector.png"))) {
+                soulEquivalent[item] = when(rarity) {
+                    Rarity.RARE -> 1
+                    Rarity.EPIC -> 2
+                    Rarity.LEGENDARY -> 5
+                    Rarity.MYTHIC -> 15
+                    else -> 1
+                }
+            }
+        }
     }
 
     fun containerSetSlot(packet: ClientboundContainerSetSlotPacket) {
@@ -56,38 +110,71 @@ object ExchangeUnitPrice : Feature {
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
 
         val item = packet.item
-        if (item.count == 1) return
+        //if (item.count == 1) return
 
-        getPerUnitPrice(item)
+        getData(item)
+    }
+
+    fun clear() {
+        perUnitPrices.clear()
+        soulEquivalent.clear()
+        wispEquivalent.clear()
     }
 
     fun slotClick(screen: ContainerScreen, type: ContainerInput) {
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
-        if (slot.item.itemName.string.contains("Back")) perUnitPrices.clear()
-        if (slot.item.itemName.string.contains("Main Filter")) perUnitPrices.clear()
-        if (slot.item.itemName.string.contains("Filter by Rarity")) perUnitPrices.clear()
-        if (slot.item.itemName.string.contains("Filter by Type")) perUnitPrices.clear()
-        if (slot.item.itemName.string.contains("Refresh Listings")) perUnitPrices.clear()
-        if (slot.item.itemName.string.contains("Next Page")) perUnitPrices.clear()
-        if (slot.item.itemName.string.contains("Previous Page")) perUnitPrices.clear()
+        if (slot.item.itemName.string.contains("Back")) clear()
+        if (slot.item.itemName.string.contains("Main Filter")) clear()
+        if (slot.item.itemName.string.contains("Filter by Rarity")) clear()
+        if (slot.item.itemName.string.contains("Filter by Type")) clear()
+        if (slot.item.itemName.string.contains("Refresh Listings")) clear()
+        if (slot.item.itemName.string.contains("Next Page")) clear()
+        if (slot.item.itemName.string.contains("Previous Page")) clear()
     }
 
     fun tooltipAdd(item: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, list: MutableList<Component>) {
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
-        if (item.count == 1) return
 
         val listedPriceIndex = list.indexOfFirst {
             it.string.contains("Listed Price")
         }
         if (listedPriceIndex == -1) return
 
-        list.add(listedPriceIndex + 1,
-            Component.literal("Unit Price: ").withColor(ChatFormatting.GRAY.color!!)
-                .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
-                .append(Component.literal("%,d".format(perUnitPrices[item])).withColor(0xffffff))
-        )
+        if (item.count != 1) {
+            list.add(listedPriceIndex + 1,
+                Component.literal("Unit Price: ").withColor(ChatFormatting.GRAY.color!!)
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
+                    .append(Component.literal("%,d".format(perUnitPrices[item])).withColor(0xffffff))
+            )
+        }
+
+        if (soulEquivalent[item] != null) {
+            val soulUnitPrice = (perUnitPrices[item] ?: 1) / (soulEquivalent[item] ?: 1)
+
+            list.add(listedPriceIndex + 1,
+                Component.literal("Soul Equivalent: ").withColor(ChatFormatting.GRAY.color!!)
+                    .append(Component.literal("\uE001").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
+                    .append(Component.literal(soulEquivalent[item].toString()).withColor(0xffffff))
+                    .append(Component.literal(", "))
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
+                    .append(Component.literal("%,d".format(soulUnitPrice) + " per").withColor(0xffffff))
+            )
+        }
+
+        if (wispEquivalent[item] != null) {
+            val wispUnitPrice = (perUnitPrices[item] ?: 1) / (wispEquivalent[item] ?: 1)
+
+            list.add(listedPriceIndex + 1,
+                Component.literal("Wisp Equivalent: ").withColor(ChatFormatting.GRAY.color!!)
+                    .append(Component.literal("\uE002").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
+                    .append(Component.literal(wispEquivalent[item].toString()).withColor(0xffffff))
+                    .append(Component.literal(", "))
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
+                    .append(Component.literal("%,d".format(wispUnitPrice) + " per").withColor(0xffffff))
+            )
+        }
     }
 }

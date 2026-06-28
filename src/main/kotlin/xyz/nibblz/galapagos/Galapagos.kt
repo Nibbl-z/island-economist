@@ -2,6 +2,7 @@ package xyz.nibblz.galapagos
 
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
+import net.minecraft.network.chat.FontDescription
 import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
@@ -16,6 +17,7 @@ object Galapagos : ModInitializer {
 
 	val logger: Logger = LoggerFactory.getLogger(MOD_ID)
 	var save: PlayerSave = PlayerSave()
+	val font = FontDescription.Resource(Identifier.fromNamespaceAndPath(MOD_ID, "main"))
 
 	fun registerFeatures() {
 		CoinTracking.init()

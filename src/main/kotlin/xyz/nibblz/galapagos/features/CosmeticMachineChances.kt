@@ -104,8 +104,7 @@ object CosmeticMachineChances : Feature {
                 .append(Component.literal(rarity.label).withColor(rarity.color)
                 .append(Component.literal(" [").withColor(ChatFormatting.DARK_GRAY.color!!))
                 .append(Component.literal("$fixedExclusiveChance% ").withColor(ChatFormatting.GRAY.color!!))
-                .append(Component.literal("\uE000").withColor(0xFFFFFF).withStyle(Style.EMPTY.withFont(FontDescription.Resource(Identifier.fromNamespaceAndPath(
-                    Galapagos.MOD_ID, "main")))))
+                .append(Component.literal("\uE000").withColor(0xFFFFFF).withStyle(Style.EMPTY.withFont(Galapagos.font)))
                 .append(Component.literal("]").withColor(ChatFormatting.DARK_GRAY.color!!)))
     }
 
