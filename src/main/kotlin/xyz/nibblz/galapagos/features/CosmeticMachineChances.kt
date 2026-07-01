@@ -15,7 +15,9 @@ import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
 import xyz.nibblz.galapagos.PlayerData
+import xyz.nibblz.galapagos.PlayerData.bonusCoresPerScavenge
 import xyz.nibblz.galapagos.PlayerData.getRep
+import xyz.nibblz.galapagos.PlayerData.repPerDonation
 import xyz.nibblz.galapagos.data.BlueprintLootPreview
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.Rarity
@@ -116,7 +118,9 @@ object CosmeticMachineChances : Feature {
                         chance = basicChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!,
                         isOwned = it.isOwned,
                         trophies = it.rarity.trophies,
-                        rep = it.getRep()
+                        rep = it.getRep(),
+                        perDonation = it.repPerDonation(),
+                        bonusCores = it.bonusCoresPerScavenge()
                     )
                 } else Galapagos.logger.warn("Failed to get basic pull chance for ${it.name}")
             }
@@ -130,7 +134,9 @@ object CosmeticMachineChances : Feature {
                         chance = ultimateChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!,
                         isOwned = it.isOwned,
                         trophies = it.rarity.trophies,
-                        rep = it.getRep()
+                        rep = it.getRep(),
+                        perDonation = it.repPerDonation(),
+                        bonusCores = it.bonusCoresPerScavenge()
                     )
                 } else Galapagos.logger.warn("Failed to get ultimate pull chance for ${it.name}")
             }

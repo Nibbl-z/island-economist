@@ -26,6 +26,24 @@
       "chars": [
         "\uE002"
       ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/mythic_core.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/arcane_core.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE004"
+      ]
     }
   ]
 }

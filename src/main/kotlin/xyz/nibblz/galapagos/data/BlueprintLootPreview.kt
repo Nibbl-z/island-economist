@@ -4,7 +4,9 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
 import net.minecraft.util.ARGB
+import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
 
 data class BlueprintLootPreview(
@@ -13,7 +15,9 @@ data class BlueprintLootPreview(
     var totalTrophies: Int = 0,
     var newRepChance: Double = 0.0,
     var currentRep: Int = 0,
-    var totalRep: Int = 0
+    var totalRep: Int = 0,
+    var trophiesPerRoll: Double = 0.0,
+    var bonusCoresPerRoll: Double = 0.0
 )
 
 fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
@@ -23,32 +27,37 @@ fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
     this.newRepChance = 0.0
     this.currentRep = 0
     this.totalRep = 0
+    this.trophiesPerRoll = 0.0
+    this.bonusCoresPerRoll = 0.0
 
-    var totalNewCosmeticChance = 0.0
-    var totalNewRepChance = 0.0
+    var totalChance = 0.0
+
+    cosmetics.forEach { totalChance += it.chance }
 
     cosmetics.forEach {
+        val fixedChance = it.chance / totalChance
+
+        this.bonusCoresPerRoll += it.bonusCores * fixedChance
+
         if (!it.isOwned) {
-            this.newCosmeticChance += it.chance
+            this.newCosmeticChance += fixedChance
+            this.trophiesPerRoll += it.trophies * fixedChance
         } else {
             this.currentTrophies += it.trophies
         }
 
         if (it.trophies != it.rep) {
-            this.newRepChance += it.chance
+            this.newRepChance += fixedChance
+            if (it.isOwned) this.trophiesPerRoll += it.perDonation * fixedChance
         }
 
         this.totalTrophies += it.trophies
         this.currentRep += it.rep
         this.totalRep += it.trophies
-
-        totalNewCosmeticChance += it.chance
-        totalNewRepChance += it.chance
     }
 
-    // this is needed because the chances for some crates are rounded and don't add up to 100% (eg. the mythic crate)
-    this.newCosmeticChance = (this.newCosmeticChance / totalNewCosmeticChance) * 100.0
-    this.newRepChance = (this.newRepChance / totalNewRepChance) * 100.0
+    this.newCosmeticChance *= 100.0
+    this.newRepChance *= 100.0
 }
 
 fun BlueprintLootPreview.render(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
@@ -76,4 +85,18 @@ fun BlueprintLootPreview.newRepTooltip(): Component {
         .append(Component.literal("${this.currentRep}/${this.totalRep} ").withColor(0x9143f0))
         .append(Glyphs.getGlyphComponent("_fonts/icon/royal_reputation.png"))
         .append(Component.literal("]").withColor(ChatFormatting.GRAY.color!!))
+}
+
+fun BlueprintLootPreview.trophiesPerRollTooltip(): Component {
+    return Component.literal("Average Trophies/Roll: ").withColor(ChatFormatting.GRAY.color!!)
+        .append(Component.literal("%.3f ".format(this.trophiesPerRoll)).withColor(ChatFormatting.GREEN.color!!))
+        .append(Glyphs.getGlyphComponent("_fonts/icon/trophy/purple.png"))
+
+}
+
+fun BlueprintLootPreview.bonusCoresPerRollTooltip(isExclusive: Boolean): Component {
+    return Component.literal("Average ${if (isExclusive) "Arcane Cores" else "Mythic Cores"}/Roll: ").withColor(ChatFormatting.GRAY.color!!)
+        .append(Component.literal("%.3f".format(this.bonusCoresPerRoll)).withColor(if (isExclusive) ChatFormatting.LIGHT_PURPLE.color!! else ChatFormatting.RED.color!!))
+        .append(Component.literal(if (isExclusive) "\uE004" else "\uE003").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
+
 }

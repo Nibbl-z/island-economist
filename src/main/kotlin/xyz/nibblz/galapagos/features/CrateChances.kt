@@ -18,13 +18,18 @@ import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
 import xyz.nibblz.galapagos.PlayerData
+import xyz.nibblz.galapagos.PlayerData.CosmeticTag
+import xyz.nibblz.galapagos.PlayerData.bonusCoresPerScavenge
 import xyz.nibblz.galapagos.PlayerData.getRep
+import xyz.nibblz.galapagos.PlayerData.repPerDonation
 import xyz.nibblz.galapagos.data.BlueprintLootPreview
 import xyz.nibblz.galapagos.data.ConstantIslandData
 import xyz.nibblz.galapagos.data.Cosmetic
+import xyz.nibblz.galapagos.data.bonusCoresPerRollTooltip
 import xyz.nibblz.galapagos.data.newCosmeticTooltip
 import xyz.nibblz.galapagos.data.newRepTooltip
 import xyz.nibblz.galapagos.data.render
+import xyz.nibblz.galapagos.data.trophiesPerRollTooltip
 import xyz.nibblz.galapagos.data.update
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
@@ -39,6 +44,8 @@ object CrateChances: Feature {
 
     var currentCrate: String? = null
     var data: HashMap<String, BlueprintLootPreview> = hashMapOf()
+
+    var exclusiveCrates: MutableList<String> = mutableListOf()
     var bestRepChance: Pair<String, Double> = Pair("", 0.0)
     var bestCosmeticChance: Pair<String, Double> = Pair("", 0.0)
     var bestExclusiveRepChance: Pair<String, Double> = Pair("", 0.0)
@@ -72,7 +79,9 @@ object CrateChances: Feature {
                     chance = it.chance,
                     isOwned = savedCosmetic.isOwned,
                     trophies = savedCosmetic.rarity.trophies,
-                    rep = savedCosmetic.getRep()
+                    rep = savedCosmetic.getRep(),
+                    perDonation = savedCosmetic.repPerDonation(),
+                    bonusCores = savedCosmetic.bonusCoresPerScavenge()
                 )
 
                 cosmetics.add(cosmetic)
@@ -86,6 +95,8 @@ object CrateChances: Feature {
             if (crateName == "Mythic Cosmetic Crate") return@forEach
 
             if (isExclusive) {
+                exclusiveCrates.add(crateName)
+
                 if (bestExclusiveCosmeticChance.second < crateData.newCosmeticChance)
                     bestExclusiveCosmeticChance = Pair(crateName, crateData.newCosmeticChance)
                 if (crateData.newCosmeticChance == 0.0 && bestExclusiveRepChance.second < crateData.newRepChance)
@@ -119,6 +130,8 @@ object CrateChances: Feature {
 
         components.add(7, data[itemName]?.newCosmeticTooltip() ?: Component.empty())
         components.add(8, data[itemName]?.newRepTooltip() ?: Component.empty())
+        components.add(9, data[itemName]?.trophiesPerRollTooltip() ?: Component.empty())
+        components.add(10, data[itemName]?.bonusCoresPerRollTooltip(exclusiveCrates.find { it == itemName } != null) ?: Component.empty())
 
         val message = when(itemName) {
             bestCosmeticChance.first -> Triple(
@@ -144,8 +157,8 @@ object CrateChances: Feature {
             else -> null
         } ?: return
 
-        components.add(9, Component.empty())
-        components.add(10, Component.empty()
+        components.add(11, Component.empty())
+        components.add(12, Component.empty()
             .append(Glyphs.getGlyphComponent(message.second))
             .append(Component.literal(" ${message.first}").withColor(message.third)))
     }

@@ -49,36 +49,3 @@ fun ItemStack.findLore(string: String): Boolean {
 
     return false
 }
-
-fun ItemStack.getCosmetic(): Cosmetic? {
-    val chanceRegex = Regex("Chance: (?<chance>[\\d,.]+)%")
-    val chanceString = this.findLore(chanceRegex)?.get("chance")?.value ?: return null
-    val chance = chanceString.toDouble()
-
-    val isOwned = this.findLore("Royal Donations:")
-    var trophies = 10
-
-    Rarity.entries.forEach {
-        if (this.findLore(it.tooltipGlyph())) {
-            trophies = it.trophies
-        }
-    }
-
-    val isExclusive = this.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/exclusive.png"))
-
-    val donations = if (isOwned) {
-        val repRegex = Regex("Royal Donations: (?<rep>\\d+)")
-        val repString = this.findLore(repRegex)?.get("rep")?.value ?: return null
-        repString.toInt()
-    } else 0
-    val trophiesPerDonation = trophies / (if (isExclusive) 5 else 10)
-
-    val rep = donations * trophiesPerDonation
-
-    return Cosmetic(
-        chance = chance,
-        isOwned = isOwned,
-        trophies = trophies,
-        rep = rep
-    )
-}
